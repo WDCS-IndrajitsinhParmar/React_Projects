@@ -1,0 +1,39 @@
+.nav{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding:.6rem 2rem;
+  background-color: white;
+}
+
+.color{
+  background-color: #F0FEF8;
+  width: 100%;
+  height: 100vh;
+}
+
+.flex{
+  display: flex;
+  gap: 1rem;
+}
+
+.navigation_link{
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  background-color: #b690f8;
+}
+
+.label1{
+
+}
+
+.label2{
+  
+}
+
+.title{
+
+}
+
+

@@ -14,7 +14,7 @@ function Product({addtocart, data, handleAdd}) {
             onClick={()=>handleAdd(product)}
             className="btn"
           >
-            {addtocart  }
+            {addtocart}
           </button>
         </div>
       ))}
