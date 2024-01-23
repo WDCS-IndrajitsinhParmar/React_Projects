@@ -4,6 +4,7 @@ import { useState } from "react";
 
 function UserInput() {
   const [data, setData] = useState(userData);
+  const localdata = JSON.parse(localStorage.getItem("form1")) || [];
 
   const handleChange = (e, id) => {
     let newData = data.map((d) => {
@@ -11,16 +12,22 @@ function UserInput() {
         return {
           ...d,
           [e.target.id]: e.target.value,
+          inputValue: [
+            {
+              id: 1,
+              value: "",
+            },
+          ],
         };
       } else {
         return {
           ...d,
         };
       }
+      // console.log(d)
     });
     setData(newData);
   };
-
   const handleRequired = (e, id) => {
     let newData = data.map((d) => {
       if (d.id === id) {
@@ -128,7 +135,8 @@ function UserInput() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // localStorage.setItem("form1", JSON.stringify(data));
+    localdata.push(data)
+    localStorage.setItem("form1", JSON.stringify(localdata));
     console.log("submit", data);
   };
 
@@ -136,8 +144,8 @@ function UserInput() {
     <form className="color" onSubmit={handleSubmit}>
       {data?.map((v, index) => {
         return (
-          <section key={v.id}>
-            <div>
+          <section key={v.id} className={v.id === 1 ? "main" : "main_input"}>
+            <div className={v.id === 1 ? "title_section" : ""}>
               <input
                 type="text"
                 id="question"
@@ -145,39 +153,42 @@ function UserInput() {
                 className={v.id === 1 ? "title" : "label"}
                 onChange={(e) => handleChange(e, v.id)}
               />
-              {v.id !== 1 && (
-                <select id="input" onChange={(e) => handleChange(e, v.id)}>
+              {v.id !== 1 ? (
+                <select
+                  id="input"
+                  onChange={(e) => handleChange(e, v.id)}
+                  className="select"
+                >
                   <option value="text">Text</option>
                   <option value="text-area">Paragraph</option>
                   <option value="checkbox">Checkbox</option>
                   <option value="radio">Multiple choice</option>
                   <option value="dropdown">Dropdown</option>
                 </select>
+              ) : (
+                v.inputValue.map((val, ind) => (
+                  <React.Fragment key={ind}>
+                    <textarea
+                      className="title_textarea"
+                      id="value"
+                      placeholder="Description"
+                      onChange={(e) => handleChangeMore(e, val.id, v.id)}
+                    ></textarea>
+                  </React.Fragment>
+                ))
               )}
+
               {v.input === "text" && v.id !== 1 && (
-                <span className="short_answer">Short answer</span>
+                <p className="dummy_answer">Short answer</p>
               )}
-              {v.id === 1
-                ? v.inputValue.map((val, ind) => (
-                    <React.Fragment key={ind}>
-                      <textarea
-                        className="description"
-                        id="value"
-                        onChange={(e) => handleChangeMore(e, val.id, v.id)}
-                      >
-                        Description
-                      </textarea>
-                    </React.Fragment>
-                  ))
-                : v.input === "text-area" &&
-                  v.id !== 1 && (
-                    <span className="long_answer">Long answer</span>
-                  )}
+              {v.input === "text-area" && v.id !== 1 && (
+                <p className="dummy_answer">Long answer</p>
+              )}
+
               {v.input === "checkbox" && v.id !== 1 && (
                 <div>
                   {v.inputValue.map((val, ind) => (
                     <React.Fragment key={ind}>
-                      {/* <input type={v.input} id="input-types" /> */}
                       <input
                         type="text"
                         id="value"
@@ -186,20 +197,30 @@ function UserInput() {
                         onChange={(e) => handleChangeMore(e, val.id, v.id)}
                       />
                       {v.inputValue.length > 1 && (
-                        <span onClick={() => handleOptionsDelete(v.id, val.id)}>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionsDelete(v.id, val.id)}
+                          className="button close_button"
+                        >
                           x
-                        </span>
+                        </button>
                       )}
+                      <br></br>
                     </React.Fragment>
                   ))}
-                  <span onClick={(e) => handleAddMore(e, v.id)}>add more</span>
+                  <button
+                    type="button"
+                    onClick={(e) => handleAddMore(e, v.id)}
+                    className="button"
+                  >
+                    Add more
+                  </button>
                 </div>
               )}
               {v.input === "radio" && v.id !== 1 && (
                 <div>
                   {v.inputValue.map((val, ind) => (
                     <React.Fragment key={ind}>
-                      <span>o</span>
                       <input
                         type="text"
                         id="value"
@@ -208,13 +229,24 @@ function UserInput() {
                         onChange={(e) => handleChangeMore(e, val.id, v.id)}
                       />
                       {v.inputValue.length > 1 && (
-                        <span onClick={() => handleOptionsDelete(v.id, val.id)}>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionsDelete(v.id, val.id)}
+                          className="button close_button"
+                        >
                           x
-                        </span>
+                        </button>
                       )}
+                      <br></br>
                     </React.Fragment>
                   ))}
-                  <span onClick={(e) => handleAddMore(e, v.id)}>add more</span>
+                  <button
+                    type="button"
+                    onClick={(e) => handleAddMore(e, v.id)}
+                    className="button"
+                  >
+                    Add more
+                  </button>
                 </div>
               )}
               {v.input === "dropdown" && v.id !== 1 && (
@@ -230,19 +262,31 @@ function UserInput() {
                         onChange={(e) => handleChangeMore(e, val.id, v.id)}
                       />
                       {v.inputValue.length > 1 && (
-                        <span onClick={() => handleOptionsDelete(v.id, val.id)}>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionsDelete(v.id, val.id)}
+                          className="button close_button"
+                        >
                           x
-                        </span>
+                        </button>
                       )}
+                      <br></br>
                     </React.Fragment>
                   ))}
-                  <span onClick={(e) => handleAddMore(e, v.id)}>add more</span>
+                  <button
+                    type="button"
+                    onClick={(e) => handleAddMore(e, v.id)}
+                    className="button"
+                  >
+                    Add more
+                  </button>
                 </div>
               )}
             </div>
+
             {v.id !== 1 && (
-              <>
-                <div>
+              <div className="flex_row">
+                <div style={{ marginBlock: "10px" }}>
                   <input
                     type="checkbox"
                     id="required"
@@ -250,14 +294,26 @@ function UserInput() {
                   />
                   <span>Required</span>
                 </div>
-                <span onClick={() => handleDelete(v.id)}>Delete</span>
-                <span onClick={handleMoreInputs}>Add more inputs</span>
-              </>
+                <div style={{ marginBlock: "10px" }}>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(v.id)}
+                    className="button"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
             )}
           </section>
         );
       })}
-      <button>submit</button>
+      <div className="flex_row flex_row2">
+        <button type="button" onClick={handleMoreInputs} className="button">
+          Add more inputs
+        </button>
+        <button className="button">submit</button>
+      </div>
     </form>
   );
 }

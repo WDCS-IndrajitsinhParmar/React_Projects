@@ -25,4 +25,3 @@ export const userData = [
   },
 ];
 
-// export const titleData = [,];
