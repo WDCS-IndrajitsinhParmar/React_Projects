@@ -1,321 +1,202 @@
 import React from "react";
-import { userData } from "../data";
+import { v4 as uuidV4 } from "uuid";
 import { useState } from "react";
+import { useRef } from "react";
 
-function UserInput() {
-  const [data, setData] = useState(userData);
-  const localdata = JSON.parse(localStorage.getItem("form1")) || [];
+function Home() {
+  let data = JSON.parse(localStorage.getItem("forms")) || [];
+  console.log("first");
+  const [id, setId] = useState(null);
+  let inputRef = useRef({
+    title: "",
+    title_description: "",
+    inputs: [],
+  });
+  console.log(inputRef.current);
 
-  const handleChange = (e, id) => {
-    let newData = data.map((d) => {
-      if (d.id === id) {
-        return {
-          ...d,
-          [e.target.id]: e.target.value,
-          inputValue: [
-            {
-              id: 1,
-              value: "",
-            },
-          ],
-        };
-      } else {
-        return {
-          ...d,
-        };
-      }
-      // console.log(d)
+
+  //add input section
+  const addInput = () => {
+    let id = uuidV4();
+    inputRef.current.inputs.push({
+      _id: id,
+      question: "",
+      options: [{ id: id + 1, option: "" }],
+      inputType: "text",
+      required: true,
     });
-    setData(newData);
+    setId(id);
   };
-  const handleRequired = (e, id) => {
-    let newData = data.map((d) => {
-      if (d.id === id) {
-        return {
-          ...d,
-          [e.target.id]: e.target.checked,
-        };
-      } else {
-        return {
-          ...d,
-        };
-      }
-    });
-    setData(newData);
+  console.log(inputRef.current);
+
+  
+  //change input value of title
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    inputRef.current[name] = value;
+    console.log(inputRef.current);
   };
 
-  const handleChangeMore = (e, param1, param2) => {
-    let newdata = data.map((d) => {
-      if (d.id === param2) {
-        let newValue = d.inputValue.map((da) => {
-          if (da.id === param1) {
-            return {
-              ...da,
-              [e.target.id]: e.target.value,
-            };
-          } else {
-            return {
-              ...da,
-            };
-          }
-        });
-        return {
-          ...d,
-          inputValue: newValue,
-        };
-      } else {
-        return {
-          ...d,
-        };
-      }
-    });
-    setData(newdata);
+  //change input value of input section [questoin] 
+  const handleChangeInner = (e, index) => {
+    const { name, value, checked } = e.target;
+    name === "question"
+      ? (inputRef.current.inputs[index][name] = value)
+      : (inputRef.current.inputs[index][name] = checked);
   };
 
-  const handleAddMore = (e, param1) => {
-    let newdata = data.map((d) => {
-      if (d.id === param1) {
-        return {
-          ...d,
-          inputValue: [
-            ...d.inputValue,
-            {
-              id: Math.floor(Math.random() * 100),
-              value: "",
-            },
-          ],
-        };
-      } else {
-        return {
-          ...d,
-        };
-      }
-    });
-    setData(newdata);
+  //change input value of the options fields of radio,checkbox and dropdown input type
+  const handleChangeOptions = (e, inde, index) => {
+    const { name, value } = e.target;
+    inputRef.current.inputs[index].options[inde][name] = value;
   };
 
-  const handleOptionsDelete = (param1, param2) => {
-    let newdata = data.map((d) => {
-      if (d.id === param1) {
-        return {
-          ...d,
-          inputValue: d.inputValue.filter((da) => da.id !== param2),
-        };
-      } else {
-        return {
-          ...d,
-        };
-      }
-    });
-    setData(newdata);
-  };
-
-  const handleMoreInputs = () => {
-    setData((prev) => [
-      ...prev,
+  //change input type
+  const handlechangeType = (e, index) => {
+    let id = uuidV4();
+    const { name, value } = e.target;
+    inputRef.current.inputs[index][name] = value;
+    inputRef.current.inputs[index].options = [
       {
-        id: Math.floor(Math.random() * 100),
-        question: "Question",
-        input: "text",
-        inputValue: [
-          {
-            id: 1,
-            value: "answer",
-          },
-        ],
-        required: "false",
+        id: id,
+        option: "",
       },
-    ]);
+    ];
+    setId(id);
   };
 
-  const handleDelete = (id) => {
-    let newData = data.filter((data) => data.id !== id);
-    setData(newData);
+  //delete input section
+  const handleDelete = (e, id) => {
+    let new_inputs = inputRef.current.inputs.filter((inp) => inp._id !== id);
+    console.log(new_inputs);
+    inputRef.current.inputs = new_inputs;
+    setId(uuidV4());
   };
 
+  //delete option of radio,checkbox and dropdown input type
+  const handleOptionDelete = (id, index) => {
+    console.log(inputRef.current.inputs[index]);
+    let new_options = inputRef.current.inputs[index].options.filter(
+      (inp) => inp.id !== id
+    );
+    console.log(new_options);
+    inputRef.current.inputs[index].options = new_options;
+    setId(uuidV4());
+  };
+
+  //add options for radio,checkbox and dropdown type
+  const handleAddOptions = (index) => {
+    let id = uuidV4();
+    console.log(inputRef.current.inputs[index]);
+    inputRef.current.inputs[index].options.push({
+      id: id,
+      option: "",
+    });
+    setId(uuidV4());
+  };
+
+
+  //add ui on addInput
+  const handleInput = () => {
+    let input = inputRef.current.inputs?.map((v, index) => (
+      <div key={v._id}>
+        <div>
+          <input
+            type="text"
+            name="question"
+            placeholder="question"
+            onChange={(e) => handleChangeInner(e, index)}
+          />
+          <select name="inputType" onChange={(e) => handlechangeType(e, index)}>
+            <option value="text">Text</option>
+            <option value="text-area">Paragraph</option>
+            <option value="checkbox">Checkbox</option>
+            <option value="radio">Multiple choice</option>
+            <option value="dropdown">Dropdown</option>
+          </select>
+        </div>
+        {v.inputType === "text" && <p>short answer</p>}
+        {v.inputType === "text-area" && <p>long answer</p>}
+        {(v.inputType === "checkbox" ||
+          v.inputType === "radio" ||
+          v.inputType === "dropdown") &&
+          v.options.map((va, inde) => (
+            <div key={va.id + 1}>
+              <div>
+                <input
+                  type="text"
+                  name="option"
+                  placeholder="option"
+                  onChange={(e) => handleChangeOptions(e, inde, index)}
+                />
+                {v.options.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleOptionDelete(va.id, index)}
+                  >
+                    X
+                  </button>
+                )}
+              </div>
+              <button type="button" onClick={() => handleAddOptions(index)}>
+                Add more
+              </button>
+            </div>
+          ))}
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              name="required"
+              defaultChecked
+              onChange={(e) => handleChangeInner(e, index)}
+            />{" "}
+            Required
+          </label>
+          <button type="button" onClick={(e) => handleDelete(e, v._id)}>
+            Delete
+          </button>
+        </div>
+      </div>
+    ));
+    return input;
+  };
+
+
+  // handle submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    localdata.push(data)
-    localStorage.setItem("form1", JSON.stringify(localdata));
-    console.log("submit", data);
+    data.push(inputRef.current);
+    localStorage.setItem("forms", JSON.stringify(data));
+    console.log(inputRef.current);
   };
 
   return (
-    <form className="color" onSubmit={handleSubmit}>
-      {data?.map((v, index) => {
-        return (
-          <section key={v.id} className={v.id === 1 ? "main" : "main_input"}>
-            <div className={v.id === 1 ? "title_section" : ""}>
-              <input
-                type="text"
-                id="question"
-                placeholder={v.question}
-                className={v.id === 1 ? "title" : "label"}
-                onChange={(e) => handleChange(e, v.id)}
-              />
-              {v.id !== 1 ? (
-                <select
-                  id="input"
-                  onChange={(e) => handleChange(e, v.id)}
-                  className="select"
-                >
-                  <option value="text">Text</option>
-                  <option value="text-area">Paragraph</option>
-                  <option value="checkbox">Checkbox</option>
-                  <option value="radio">Multiple choice</option>
-                  <option value="dropdown">Dropdown</option>
-                </select>
-              ) : (
-                v.inputValue.map((val, ind) => (
-                  <React.Fragment key={ind}>
-                    <textarea
-                      className="title_textarea"
-                      id="value"
-                      placeholder="Description"
-                      onChange={(e) => handleChangeMore(e, val.id, v.id)}
-                    ></textarea>
-                  </React.Fragment>
-                ))
-              )}
-
-              {v.input === "text" && v.id !== 1 && (
-                <p className="dummy_answer">Short answer</p>
-              )}
-              {v.input === "text-area" && v.id !== 1 && (
-                <p className="dummy_answer">Long answer</p>
-              )}
-
-              {v.input === "checkbox" && v.id !== 1 && (
-                <div>
-                  {v.inputValue.map((val, ind) => (
-                    <React.Fragment key={ind}>
-                      <input
-                        type="text"
-                        id="value"
-                        placeholder="Option 1"
-                        className="label2"
-                        onChange={(e) => handleChangeMore(e, val.id, v.id)}
-                      />
-                      {v.inputValue.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleOptionsDelete(v.id, val.id)}
-                          className="button close_button"
-                        >
-                          x
-                        </button>
-                      )}
-                      <br></br>
-                    </React.Fragment>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={(e) => handleAddMore(e, v.id)}
-                    className="button"
-                  >
-                    Add more
-                  </button>
-                </div>
-              )}
-              {v.input === "radio" && v.id !== 1 && (
-                <div>
-                  {v.inputValue.map((val, ind) => (
-                    <React.Fragment key={ind}>
-                      <input
-                        type="text"
-                        id="value"
-                        placeholder="Option 1"
-                        className="label2"
-                        onChange={(e) => handleChangeMore(e, val.id, v.id)}
-                      />
-                      {v.inputValue.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleOptionsDelete(v.id, val.id)}
-                          className="button close_button"
-                        >
-                          x
-                        </button>
-                      )}
-                      <br></br>
-                    </React.Fragment>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={(e) => handleAddMore(e, v.id)}
-                    className="button"
-                  >
-                    Add more
-                  </button>
-                </div>
-              )}
-              {v.input === "dropdown" && v.id !== 1 && (
-                <div>
-                  {v.inputValue.map((val, ind) => (
-                    <React.Fragment key={ind}>
-                      <span>{ind + 1}</span>
-                      <input
-                        type="text"
-                        id="value"
-                        placeholder="Option 1"
-                        className="label2"
-                        onChange={(e) => handleChangeMore(e, val.id, v.id)}
-                      />
-                      {v.inputValue.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleOptionsDelete(v.id, val.id)}
-                          className="button close_button"
-                        >
-                          x
-                        </button>
-                      )}
-                      <br></br>
-                    </React.Fragment>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={(e) => handleAddMore(e, v.id)}
-                    className="button"
-                  >
-                    Add more
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {v.id !== 1 && (
-              <div className="flex_row">
-                <div style={{ marginBlock: "10px" }}>
-                  <input
-                    type="checkbox"
-                    id="required"
-                    onChange={(e) => handleRequired(e, v.id)}
-                  />
-                  <span>Required</span>
-                </div>
-                <div style={{ marginBlock: "10px" }}>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(v.id)}
-                    className="button"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )}
-          </section>
-        );
-      })}
-      <div className="flex_row flex_row2">
-        <button type="button" onClick={handleMoreInputs} className="button">
-          Add more inputs
-        </button>
-        <button className="button">submit</button>
-      </div>
+    <form onSubmit={handleSubmit}>
+      <label>
+        Text input:{" "}
+        <input
+          name="title"
+          placeholder="Untitled Form"
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Text input:{" "}
+        <textarea
+          name="title_description"
+          placeholder="Form description"
+          onChange={handleChange}
+        />
+      </label>
+      <hr />
+      {handleInput()}
+      <button type="button" onClick={addInput}>
+        Add Input Field
+      </button>
+      <button type="submit">Submit form</button>
     </form>
   );
 }
 
-export default UserInput;
+export default Home;
